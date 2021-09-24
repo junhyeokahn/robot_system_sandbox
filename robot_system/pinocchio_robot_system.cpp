@@ -22,11 +22,17 @@ Eigen::Vector3d PinocchioRobotSystem::get_base_local_com_pos() {}
 
 std::string PinocchioRobotSystem::get_base_link_name() {}
 
-int PinocchioRobotSystem::get_q_idx(const std::string joint_name) {}
+int PinocchioRobotSystem::get_q_idx(const std::string joint_name) {
+    return joint_id_[joint_name];
+}
 
-int PinocchioRobotSystem::get_q_dot_idx(const std::string joint_name) {}
+int PinocchioRobotSystem::get_q_dot_idx(const std::string joint_name) {
+    return joint_id_[joint_name];
+}
 
-int PinocchioRobotSystem::get_joint_idx(const std::string joint_name) {}
+int PinocchioRobotSystem::get_joint_idx(const std::string joint_name) {
+    return joint_id_[joint_name] - n_floating;
+}
 
 std::map<std::string, double>
 PinocchioRobotSystem::vector_to_map(const Eigen::VectorXd &cmd_vec) {}
