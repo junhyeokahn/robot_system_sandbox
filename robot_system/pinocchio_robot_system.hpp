@@ -1,11 +1,37 @@
-#include "pinocchio/multibody/fcl.hpp"
+#pragma once
+#include <pinocchio/fwd.hpp>
 #include "pinocchio/parsers/urdf.hpp"
 
 #include "pinocchio/algorithm/joint-configuration.hpp"
 #include "pinocchio/algorithm/kinematics.hpp"
+
+/*#include "pinocchio/multibody/data.hpp"
+#include "pinocchio/multibody/model.hpp"
+
+#include "pinocchio/algorithm/check.hpp"
+#include "pinocchio/algorithm/model.hpp"
+#include "pinocchio/algorithm/kinematics.hpp"
+#include "pinocchio/algorithm/frames.hpp"
+#include "pinocchio/algorithm/joint-configuration.hpp"
 #include "pinocchio/algorithm/geometry.hpp"
 
+#include "pinocchio/parsers/sample-models.hpp"
+#include "pinocchio/parsers/urdf.hpp"
+
+/*#include "pinocchio/multibody/fcl.hpp"
+#include "pinocchio/multibody/data.hpp"
+#include "pinocchio/multibody/model.hpp"
+
+#include "pinocchio/algorithm/model.hpp"
+#include "pinocchio/algorithm/joint-configuration.hpp"
+#include "pinocchio/algorithm/kinematics.hpp"
+#include "pinocchio/algorithm/geometry.hpp"
+
+ */
+
 #include "robot_system/robot_system.hpp"
+
+using namespace pinocchio;
 
 /*
  *  Pinnochio considers floating base with 7 positions and 6 velocities with the
@@ -63,6 +89,17 @@ public:
 private:
   virtual void _update_centroidal_quantities();
   virtual void _config_robot();
+
+  Model model;
+  GeometryModel collision_model;
+  GeometryModel visual_model;
+
+  Data data;
+  GeometryData collision_data;
+  GeometryData visual_data;
+
+  Eigen::VectorXd q;
+  Eigen::VectorXd q_dot;
 
   std::string urdf_file_;
   std::string package_dir_;

@@ -1,7 +1,8 @@
+#include "robot_system/pinocchio_robot_system.cpp"
 #include <iostream>
 #include <cmath>
-#include "robot_system/dart_robot_system.cpp"
-#include "robot_system/pinocchio_robot_system.cpp"
+//#include "robot_system/dart_robot_system.cpp"
+
 
 
 using namespace std;
@@ -9,10 +10,10 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
 
-  DartRobotSystem twoLinkRobot("/home/narwhal22/robot_system_sandbox/two_link_manipulator.urdf", true, true);
+  //DartRobotSystem twoLinkRobot("/home/narwhal22/robot_system_sandbox/two_link_manipulator.urdf", true, true);
   PinocchioRobotSystem pRobot ("a","b", true, true);
 
-  Eigen::Vector3d com_pos(0,0,0);
+  /*Eigen::Vector3d com_pos(0,0,0);
   Eigen::Vector3d com_lv(0,0,0);
   Eigen::Vector3d com_av(0,0,0);
   Eigen::Quaternion<double> com_quat(1,0,0,0);
@@ -39,7 +40,7 @@ int main(int argc, char *argv[]) {
   cout << jacobian <<  endl;
 
 
-  cout << "robot updated" << endl;
+  cout << "robot updated" << endl;*/
 
   return 0;
 }

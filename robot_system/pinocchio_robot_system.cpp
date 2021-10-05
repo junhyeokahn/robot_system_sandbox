@@ -1,4 +1,7 @@
 #include "robot_system/pinocchio_robot_system.hpp"
+using namespace pinocchio;
+using namespace std;
+
 
 PinocchioRobotSystem::PinocchioRobotSystem(const std::string _urdf_file,
                                            const std::string _package_dir,
@@ -8,8 +11,10 @@ PinocchioRobotSystem::PinocchioRobotSystem(const std::string _urdf_file,
       package_dir_(_package_dir) {
   this->_config_robot();
 
-  joint_positions.resize(n_a);
-  joint_velocities.resize(n_a);
+    joint_positions.resize(n_a);
+    joint_velocities.resize(n_a);
+    q = Eigen::VectorXd::Zero(n_q);
+    q_dot = Eigen::VectorXd::Zero(n_q_dot);
 
   Ag.resize(6, n_q_dot);
 }
@@ -18,21 +23,13 @@ PinocchioRobotSystem::~PinocchioRobotSystem() {}
 
 void PinocchioRobotSystem::_config_robot() {
 
-    if(_b_fixed_base){
-        Model model;
-        GeometryModel collision_model;
-        GeometryModel visual_model;
-
+    if(b_fixed_base){
         pinocchio::urdf::buildModel(urdf_file_, model);
         pinocchio::urdf::buildGeom(model, urdf_file_, COLLISION, collision_model, package_dir_);
         pinocchio::urdf::buildGeom(model, urdf_file_, VISUAL, visual_model, package_dir_);
 
         n_floating = 0;
     } else {
-        Model model;
-        GeometryModel collision_model;
-        GeometryModel visual_model;
-
         pinocchio::urdf::buildModel(urdf_file_, pinocchio::JointModelFreeFlyer(), model);
         pinocchio::urdf::buildGeom(model, urdf_file_, COLLISION, collision_model, package_dir_);
         pinocchio::urdf::buildGeom(model, urdf_file_, VISUAL, visual_model, package_dir_);
@@ -40,9 +37,9 @@ void PinocchioRobotSystem::_config_robot() {
         n_floating = 6;
     }
 
-    Data data(model);
-    GeometryData collision_data(collision_model);
-    GeometryData visual_data(visual_model);
+    data = Data(model);
+    collision_data = GeometryData(collision_model);
+    visual_data = GeometryData(visual_model);
 
     n_q = model.nq;
     n_q_dot = model.nv;
@@ -50,7 +47,7 @@ void PinocchioRobotSystem::_config_robot() {
 
     int passing_index = 0;
     for(JointIndex i = 1; i < (JointIndex)model.njoints; ++i){  // NOT SURE IF START AT 0???
-        if (model.names[i] == 'root_joint' || model.names[i] == 'universe'){
+        if (model.names[i] == "root_joint" || model.names[i] == "universe"){
             passing_index += 1;
         }
         else {
@@ -60,8 +57,8 @@ void PinocchioRobotSystem::_config_robot() {
     }
 
     for(FrameIndex i = 1; i < (FrameIndex) model.nframes; ++i){
-        String frameName = model.frames[i].name;
-        if (frameName == 'root_joint' || frameName == 'universe'){} // pass
+        string frameName = model.frames[i].name;
+        if (frameName == "root_joint" || frameName == "universe"){} // pass
         else {
             if (i%2 == 0){
                 // Link
@@ -81,7 +78,7 @@ void PinocchioRobotSystem::_config_robot() {
     joint_vel_limit.resize(n_a, 2);
     joint_trq_limit.resize(n_a, 2);
 
-    if(_b_fixed_base){
+    if(b_fixed_base){
         joint_pos_limit.block(0, 0, n_a, 1) = model.lowerPositionLimit;
         joint_pos_limit.block(0, 1, n_a, 1) = model.upperPositionLimit;
     } else {
@@ -130,36 +127,35 @@ void PinocchioRobotSystem::update_system(
 
     assert(joint_pos.size() == n_a);
 
-    Eigen::Matrix<double, n_q, 1> q;
-    Eigen::Matrix<double, n_q_dot, 1> q_dot;
-    Eigen::Matrix<double, n_a, 1> joint_positions;
-    Eigen::Matrix<double, n_a, 1> joint_velocities;
+    Eigen::VectorXd quat_vec(4);
+    quat_vec << base_joint_quat.x(), base_joint_quat.y(), base_joint_quat.z(), base_joint_quat.w();
 
-    if(!_b_fixed_base){
+    if(!b_fixed_base){
+
         q.segment(0, 3) = base_joint_pos;
-        q.segment(3, 7) = base_joint_quat;
+        q.segment(3, 4) = quat_vec;
 
         Eigen::Matrix<double, 3, 3> rot_w_basejoint = base_joint_quat.normalized().toRotationMatrix();
         Eigen::Matrix<double, 6, 1> twist_basejoint_in_world;
         twist_basejoint_in_world.segment(0, 3) = base_joint_ang_vel;
-        twist_basejoint_in_world.segment(3, 6) = base_joint_lin_vel;
+        twist_basejoint_in_world.segment(3, 3) = base_joint_lin_vel;
 
         Eigen::Matrix<double, 6, 6> augrot_joint_world;
         augrot_joint_world.block(0, 0, 3, 3) = rot_w_basejoint.transpose();
         augrot_joint_world.block(3, 3, 3, 3) = rot_w_basejoint.transpose();
 
-        Eigen::Matrix<double, 6, 1> twist_basejoint_in_joint = augrot_joint_world.dot(twist_basejoint_in_world);
-        q_dot.segment(0, 3) = twist_basejoint_in_joint.segment(3, 6);
-        q_dot.segment(3, 6) = twist_basejoint_in_joint.segment(0, 3);
+        Eigen::Matrix<double, 6, 1> twist_basejoint_in_joint = augrot_joint_world*twist_basejoint_in_world;
+        q_dot.segment(0, 3) = twist_basejoint_in_joint.segment(3, 3);
+        q_dot.segment(3, 3) = twist_basejoint_in_joint.segment(0, 3);
     } else {} // fixed base robot
 
     for (const auto [key, value] : joint_pos){
-        q(get_q_idx(key), 0) = value;
-        joint_positions(get_joint_idx(key), 0) =  value;
+        q(get_q_idx(key)) = value;
+        joint_positions(get_joint_idx(key)) =  value;
     }
     for (const auto [key, value] : joint_vel){
-        q_dot(get_q_dot_idx(key), 0) = value;
-        joint_velocities(get_joint_idx(key), 0) = value;
+        q_dot(get_q_dot_idx(key)) = value;
+        joint_velocities(get_joint_idx(key)) = value;
     }
 
     forwardKinematics(model, data, q, q_dot);
