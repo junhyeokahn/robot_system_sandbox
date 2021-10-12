@@ -17,3 +17,6 @@ add_subdirectory(robot_system)
 
 add_executable(main main.cpp)
 target_link_libraries(main my_robot_system)
+
+add_executable(main2 main2.cpp)
+target_link_libraries(main2 my_robot_system)

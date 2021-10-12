@@ -169,50 +169,52 @@ void PinocchioRobotSystem::update_system(
 void PinocchioRobotSystem::_update_centroidal_quantities() {
     ccrba(model, data, q, q_dot);
 
-    hg.segment(0, 3) = data.hg.angular();
+    /*hg.segment(0, 3) = data.hg.angular();
     hg.segment(3, 3) = data.hg.linear();
 
     Ag.topRows(3) = data.Ag.template middleRows<3>(Force::ANGULAR);
-    Ag.bottomRows(3) = data.Ag.template middleRows<3>(Force::LINEAR);
+    Ag.bottomRows(3) = data.Ag.template middleRows<3>(Force::LINEAR);*/
 
-    Ig.block(0, 0, 3, 3) = data.Ig; // IDK WHAT TO DO HERE
-    Ig.block(3, 3, 3, 3) = data.Ig;
+
+    Ig.block(0, 0, 3, 3) = data.Ig.matrix().block(3, 3, 3, 3); // IDK WHAT TO DO HERE
+    Ig.block(3, 3, 3, 3) = data.Ig.matrix().block(0, 0, 3, 3);
+    
 }
 
 Eigen::VectorXd PinocchioRobotSystem::get_q() {
-    VectorXd q_copy = q;
+    Eigen::VectorXd q_copy = q;
     return q_copy;
 }
 
 Eigen::VectorXd PinocchioRobotSystem::get_q_dot() {
-    VectorXd q_dot_copy = q_dot;
+    Eigen::VectorXd q_dot_copy = q_dot;
     return q_dot_copy;
 }
 
 Eigen::MatrixXd PinocchioRobotSystem::get_mass_matrix() {
-    MatrixXd mass_matrix = crba(model, data, q);
+    Eigen::MatrixXd mass_matrix = crba(model, data, q);
     return mass_matrix;
 }
 
 Eigen::VectorXd PinocchioRobotSystem::get_gravity() {
-    VectorXd gen_gravity = computeGeneralizedGravity(model, data, q);
+    Eigen::VectorXd gen_gravity = computeGeneralizedGravity(model, data, q);
     return gen_gravity;
 }
 
 Eigen::VectorXd PinocchioRobotSystem::get_coriolis() {
-    VectorXd coriolis = nonLinearEffects(model, data, q, q_dot) - get_gravity();
+    Eigen::VectorXd coriolis = nonLinearEffects(model, data, q, q_dot) - get_gravity();
     return coriolis;
 }
 
 Eigen::Vector3d PinocchioRobotSystem::get_com_pos() {
     centerOfMass(model, data, q, q_dot);
-    Vector3d com = data.com[0];
+    Eigen::Vector3d com = data.com[0];
     return com;
 }
 
 Eigen::Vector3d PinocchioRobotSystem::get_com_lin_vel() {
     centerOfMass(model, data, q, q_dot);
-    Vector3d vcom = data.vcom[0];
+    Eigen::Vector3d vcom = data.vcom[0];
     return vcom;
 }
 
@@ -232,7 +234,7 @@ Eigen::Isometry3d
 PinocchioRobotSystem::get_link_iso(const std::string link_id) {
     Eigen::Isometry3d ret;
     Model::Index frame_id = model.getFrameId(link_id);
-    Vector3d trans = updateFramePlacement(model, data, frame_id);
+    const SE3Tpl<double, 0> trans = updateFramePlacement(model, data, frame_id);
     ret = trans.rotation();
     ret.translation() = trans.translation();
     return ret;
@@ -255,11 +257,17 @@ PinocchioRobotSystem::get_link_jacobian(const std::string link_id) {
     Model::Index frame_id = model.getFrameId(link_id);
     computeJointJacobians(model, data, q);
 
-    Eigen::Matrix<double, 6, Eigen::Dynamic> jac = getFrameJacobian(model, data, frame_id, LOCAL_WORLD_ALIGNED);
-    Eigen::Matrix<double, 6, Eigen::Dynamic> ret;
+    cout << "before" << endl;
+    Eigen::MatrixXd jac = Eigen::MatrixXd::Zero(6, n_q_dot);
+    getFrameJacobian(model, data, frame_id, LOCAL_WORLD_ALIGNED, jac);
 
+    cout << "after" << endl;
+    Eigen::MatrixXd ret = Eigen::MatrixXd::Zero(6, n_q_dot);
+
+    cout << "before toprows" << endl;
     ret.topRows(3) = jac.bottomRows(3);
     ret.bottomRows(3) = jac.topRows(3);
+    cout << "after rows" << endl;
 
     return ret;
 }
