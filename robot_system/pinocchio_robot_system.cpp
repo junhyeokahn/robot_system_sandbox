@@ -169,12 +169,11 @@ void PinocchioRobotSystem::update_system(
 void PinocchioRobotSystem::_update_centroidal_quantities() {
     ccrba(model, data, q, q_dot);
 
-    /*hg.segment(0, 3) = data.hg.angular();
+    hg.segment(0, 3) = data.hg.angular();
     hg.segment(3, 3) = data.hg.linear();
 
     Ag.topRows(3) = data.Ag.template middleRows<3>(Force::ANGULAR);
-    Ag.bottomRows(3) = data.Ag.template middleRows<3>(Force::LINEAR);*/
-
+    Ag.bottomRows(3) = data.Ag.template middleRows<3>(Force::LINEAR);
 
     Ig.block(0, 0, 3, 3) = data.Ig.matrix().block(3, 3, 3, 3); // IDK WHAT TO DO HERE
     Ig.block(3, 3, 3, 3) = data.Ig.matrix().block(0, 0, 3, 3);
@@ -192,7 +191,10 @@ Eigen::VectorXd PinocchioRobotSystem::get_q_dot() {
 }
 
 Eigen::MatrixXd PinocchioRobotSystem::get_mass_matrix() {
-    Eigen::MatrixXd mass_matrix = crba(model, data, q);
+    crba(model, data, q);
+    data.M.triangularView<Eigen::StrictlyLower>() = data.M.transpose().triangularView<Eigen::StrictlyLower>();
+
+    Eigen::MatrixXd mass_matrix = data.M;
     return mass_matrix;
 }
 
@@ -207,12 +209,13 @@ Eigen::VectorXd PinocchioRobotSystem::get_coriolis() {
 }
 
 Eigen::Vector3d PinocchioRobotSystem::get_com_pos() {
-    centerOfMass(model, data, q, q_dot);
-    Eigen::Vector3d com = data.com[0];
+    crba(model, data, q);
+    Eigen::Vector3d com = centerOfMass(model, data, q, q_dot);
     return com;
 }
 
 Eigen::Vector3d PinocchioRobotSystem::get_com_lin_vel() {
+    crba(model, data, q);
     centerOfMass(model, data, q, q_dot);
     Eigen::Vector3d vcom = data.vcom[0];
     return vcom;
@@ -220,6 +223,7 @@ Eigen::Vector3d PinocchioRobotSystem::get_com_lin_vel() {
 
 Eigen::Matrix<double, 3, Eigen::Dynamic>
 PinocchioRobotSystem::get_com_lin_jacobian() {
+    crba(model, data, q);
     Eigen::Matrix<double, 3, Eigen::Dynamic> Jcom = jacobianCenterOfMass(model, data, q);
     return Jcom;
 }

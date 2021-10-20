@@ -17,11 +17,11 @@ int main(int argc, char *argv[]) {
   Eigen::Vector3d com_lv(0,0,0);
   Eigen::Vector3d com_av(0,0,0);
   Eigen::Quaternion<double> com_quat(1,0,0,0);
-  Eigen::Vector3d bjoint_pos(1,0.5,0);
-  Eigen::Vector3d bjoint_lv(2,3,0);
-  Eigen::Vector3d bjoint_av(4,1,0);
+  Eigen::Vector3d bjoint_pos(0,0,0);
+  Eigen::Vector3d bjoint_lv(0,0,0);
+  Eigen::Vector3d bjoint_av(0,0,0);
   Eigen::Quaternion<double> bjoint_quat(1 ,0,0,0);
-  map<string, double> joint_pos = {{"j0", M_PI/4}, {"j1", M_PI/4}};
+  map<string, double> joint_pos = {{"j0", 0}, {"j1", 0}};
   map<string, double> joint_vel = {{"j0", 0.5}, {"j1", 0.25}};
 
   twoLinkRobot.update_system(com_pos, com_quat, com_lv, com_av, bjoint_pos, bjoint_quat, bjoint_lv, bjoint_av, joint_pos, joint_vel, false);
@@ -41,27 +41,25 @@ int main(int argc, char *argv[]) {
   Eigen::MatrixXd jacobian = twoLinkRobot.get_link_jacobian("ee");
   cout << jacobian <<  endl;
 
-  cout << "base_local_com_pos:" << endl;
+  /*cout << "base_local_com_pos:" << endl;
   Eigen::Vector3d localcom = twoLinkRobot.get_base_local_com_pos();
   cout << localcom <<  endl;
 
   cout << "base_link_name:" << endl;
   string bLinkName = twoLinkRobot.get_base_link_name();
-  cout << bLinkName <<  endl;
+  cout << bLinkName <<  endl; */
 
   cout << "q_idx:" << endl;
-  int q_idx = twoLinkRobot.get_q_idx("ee");
+  int q_idx = twoLinkRobot.get_q_idx("j1");
   cout << q_idx <<  endl;
 
   cout << "q_dot_idx:" << endl;
-  int q_d_idx = twoLinkRobot.get_q_dot_idx("ee");
+  int q_d_idx = twoLinkRobot.get_q_dot_idx("j1");
   cout << q_d_idx <<  endl;
 
   cout << "joint_idx:" << endl;
-  int j_idx = twoLinkRobot.get_joint_idx("ee");
+  int j_idx = twoLinkRobot.get_joint_idx("j1");
   cout << j_idx <<  endl;
-
-  twoLinkRobot._update_centroidal_quantities();
 
   cout << "q:" << endl;
   Eigen::VectorXd _q = twoLinkRobot.get_q();
