@@ -159,8 +159,6 @@ void DartRobotSystem::update_system(
     Eigen::Matrix<double, 6, 1> joint_vel_in_world;
     joint_vel_in_world.segment(0, 3) = base_joint_ang_vel;
     joint_vel_in_world.segment(3, 3) = base_joint_lin_vel;
-    std::cout << "joint_vel" << std::endl;
-    std::cout << joint_vel_in_world << std::endl;
     Eigen::Matrix<double, 6, 1> zero_acc = Eigen::Matrix<double, 6, 1>::Zero();
     dynamic_cast<dart::dynamics::FreeJoint *>(skel_->getRootJoint())
         ->setSpatialMotion(&joint_iso, dart::dynamics::Frame::World(),
@@ -177,9 +175,6 @@ void DartRobotSystem::update_system(
 
     skel_->getRootJoint()->setTransformFromParentBodyNode(base_joint_iso);
   }
-
-  std::cout<< "q_dot" << std::endl;
-  std::cout << this->get_q_dot() << std::endl;
 
   for (std::map<std::string, double>::const_iterator it = joint_pos.begin();
        it != joint_pos.end(); it++) {
@@ -199,8 +194,6 @@ void DartRobotSystem::update_system(
   if (b_cent) {
     this->_update_centroidal_quantities();
   }
-  std::cout<< "q_dot" << std::endl;
-  std::cout << this->get_q_dot() << std::endl;
 }
 
 void DartRobotSystem::_update_centroidal_quantities() {
