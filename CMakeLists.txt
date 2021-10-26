@@ -20,3 +20,9 @@ target_link_libraries(main my_robot_system)
 
 add_executable(main2 main2.cpp)
 target_link_libraries(main2 my_robot_system)
+
+add_executable(main3 main3.cpp)
+target_link_libraries(main3 my_robot_system)
+
+add_executable(main4 main4.cpp)
+target_link_libraries(main4 my_robot_system)

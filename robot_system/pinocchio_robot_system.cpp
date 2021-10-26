@@ -147,6 +147,8 @@ void PinocchioRobotSystem::update_system(
         Eigen::Matrix<double, 6, 1> twist_basejoint_in_joint = augrot_joint_world*twist_basejoint_in_world;
         q_dot.segment(0, 3) = twist_basejoint_in_joint.segment(3, 3);
         q_dot.segment(3, 3) = twist_basejoint_in_joint.segment(0, 3);
+        cout << "q_dot" << endl;
+        cout << q_dot << endl;
     } else {} // fixed base robot
 
     for (const auto [key, value] : joint_pos){
@@ -175,7 +177,8 @@ void PinocchioRobotSystem::_update_centroidal_quantities() {
     Ag.topRows(3) = data.Ag.template middleRows<3>(Force::ANGULAR);
     Ag.bottomRows(3) = data.Ag.template middleRows<3>(Force::LINEAR);
 
-    Ig.block(0, 0, 3, 3) = data.Ig.matrix().block(3, 3, 3, 3); // IDK WHAT TO DO HERE
+    Ig.setZero();
+    Ig.block(0, 0, 3, 3) = data.Ig.matrix().block(3, 3, 3, 3); 
     Ig.block(3, 3, 3, 3) = data.Ig.matrix().block(0, 0, 3, 3);
     
 }
