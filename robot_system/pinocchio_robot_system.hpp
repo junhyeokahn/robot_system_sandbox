@@ -2,43 +2,17 @@
 
 #define __pinocchio_compute_all_terms_hpp__
 
+#include "pinocchio/parsers/urdf.hpp"
 #include <pinocchio/fwd.hpp>
-#include "pinocchio/parsers/urdf.hpp"
 
-#include "pinocchio/algorithm/joint-configuration.hpp"
-#include "pinocchio/algorithm/kinematics.hpp"
-#include "pinocchio/algorithm/crba.hpp"
-#include "pinocchio/algorithm/centroidal.hpp"
-#include "pinocchio/algorithm/rnea.hpp"
-#include "pinocchio/algorithm/jacobian.hpp"
 #include "pinocchio/algorithm/center-of-mass.hpp"
+#include "pinocchio/algorithm/centroidal.hpp"
+#include "pinocchio/algorithm/crba.hpp"
 #include "pinocchio/algorithm/frames.hpp"
-
-
-
-/*#include "pinocchio/multibody/data.hpp"
-#include "pinocchio/multibody/model.hpp"
-
-#include "pinocchio/algorithm/check.hpp"
-#include "pinocchio/algorithm/model.hpp"
-#include "pinocchio/algorithm/kinematics.hpp"
-#include "pinocchio/algorithm/frames.hpp"
-#include "pinocchio/algorithm/joint-configuration.hpp"
-#include "pinocchio/algorithm/geometry.hpp"
-
-#include "pinocchio/parsers/sample-models.hpp"
-#include "pinocchio/parsers/urdf.hpp"
-
-/*#include "pinocchio/multibody/fcl.hpp"
-#include "pinocchio/multibody/data.hpp"
-#include "pinocchio/multibody/model.hpp"
-
-#include "pinocchio/algorithm/model.hpp"
+#include "pinocchio/algorithm/jacobian.hpp"
 #include "pinocchio/algorithm/joint-configuration.hpp"
 #include "pinocchio/algorithm/kinematics.hpp"
-#include "pinocchio/algorithm/geometry.hpp"
-
- */
+#include "pinocchio/algorithm/rnea.hpp"
 
 #include "robot_system/robot_system.hpp"
 
@@ -111,7 +85,6 @@ private:
 
   Eigen::VectorXd q;
   Eigen::VectorXd q_dot;
-
 
   std::string urdf_file_;
   std::string package_dir_;

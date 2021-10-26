@@ -14,11 +14,11 @@ int main(int argc, char *argv[]) {
   Eigen::Vector3d com_pos(0, 0, 0);
   Eigen::Vector3d com_lv(0.1, 0, 0);
   Eigen::Vector3d com_av(0.1, 0, 0);
-  Eigen::Quaternion<double> com_quat(1, 0, 0, 0);
+  Eigen::Quaternion<double> com_quat(0.525322, 0, 0, 0.8509035);
   Eigen::Vector3d bjoint_pos(0, 0, 0);
   Eigen::Vector3d bjoint_lv(0.1, 0, 0);
   Eigen::Vector3d bjoint_av(0.1, 0, 0);
-  Eigen::Quaternion<double> bjoint_quat(1, 0, 0, 0);
+  Eigen::Quaternion<double> bjoint_quat(0.525322, 0, 0, 0.8509035);
   map<string, double> joint_pos = {
       {"back_bkx", 0},    {"back_bky", 0},    {"back_bkz", 0},
       {"l_arm_elx", 0},   {"l_arm_ely", 0},   {"l_arm_shx", 0},
@@ -42,9 +42,9 @@ int main(int argc, char *argv[]) {
       {"r_leg_akx", 0.1}, {"r_leg_aky", 0.2}, {"r_leg_hpx", 0},
       {"r_leg_hpy", 0},   {"r_leg_hpz", 0},   {"r_leg_kny", 0}};
 
-  atlas.update_system(com_pos, com_quat, com_lv, com_av, bjoint_pos,
-                      bjoint_quat, bjoint_lv, bjoint_av, joint_pos, joint_vel,
-                      true);
+  atlas.update_system(com_pos, com_quat.normalized(), com_lv, com_av,
+                      bjoint_pos, bjoint_quat.normalized(), bjoint_lv,
+                      bjoint_av, joint_pos, joint_vel, true);
 
   cout << "robot updated" << endl;
 
